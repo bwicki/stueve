@@ -482,15 +482,25 @@ function draw(rows){
     ctx.restore();
   }
 
+  // Background guide-line density. On narrow plots (phone, or the centre
+  // column squeezed by the side panels) the standard 5-unit grid puts the
+  // isotherms, dry and moist adiabats only a few pixels apart and buries the
+  // data curves. Once a 5-unit step falls below ~34 px the grid thins out:
+  // 10-unit steps, fewer mixing-ratio lines, thinner and fainter strokes.
+  const px5 = 5 * plotW / Math.max(1, (Tmax - Tmin));
+  const denseBg = !printMode && px5 < 34;
+  const guideStep = denseBg ? 10 : 5;
+  const guideAlpha = denseBg ? 0.75 : 1;
+
   // Saturation mixing ratio lines (g/kg) — curved, faint, standard
   // background element on professional soundings/Stüve diagrams.
   ctx.strokeStyle = '#5fae7a';
   ctx.setLineDash([1,4]);
-  ctx.lineWidth = 0.9;
-  ctx.globalAlpha = 0.55;
+  ctx.lineWidth = denseBg ? 0.7 : 0.9;
+  ctx.globalAlpha = denseBg ? 0.4 : 0.55;
   const pTopMix = pOf(Ymin);
   const pBotMix = pOf(Ymax);
-  [1,2,4,7,10,16,24].forEach(rsGkg=>{
+  (denseBg ? [1,2,4,10,24] : [1,2,4,7,10,16,24]).forEach(rsGkg=>{
     ctx.beginPath();
     let started = false;
     for(let p=pBotMix; p>=pTopMix-10; p-=15){
@@ -503,11 +513,12 @@ function draw(rows){
   ctx.globalAlpha = 1;
   ctx.setLineDash([]);
 
-  // Isotherms (vertical, every 5°C)
+  // Isotherms (vertical, every 5°C — 10°C on narrow plots)
   ctx.strokeStyle = cIso;
   ctx.setLineDash([1,3]);
-  ctx.lineWidth = 1.1;
-  for(let t=Math.ceil(Tmin/5)*5; t<=Tmax; t+=5){
+  ctx.lineWidth = denseBg ? 0.8 : 1.1;
+  ctx.globalAlpha = guideAlpha;
+  for(let t=Math.ceil(Tmin/guideStep)*guideStep; t<=Tmax; t+=guideStep){
     const x = xScale(t);
     ctx.beginPath();
     ctx.moveTo(x, pad.top);
@@ -516,14 +527,14 @@ function draw(rows){
   }
   ctx.setLineDash([]);
 
-  // Dry adiabats — denser grid, every 5K. Sampled at multiple pressure
-  // levels (not just 2 endpoints) via the Poisson formula, so they render
-  // correctly as straight lines in Stüve and as curves in Emagram mode.
+  // Dry adiabats — every 5 K (10 K on narrow plots). Sampled at multiple
+  // pressure levels (not just 2 endpoints) via the Poisson formula, so they
+  // render correctly as straight lines in Stüve and as curves in Emagram mode.
   ctx.strokeStyle = cAdia;
   ctx.setLineDash([6,4]);
-  ctx.lineWidth = 1;
+  ctx.lineWidth = denseBg ? 0.75 : 1;
   const pTopAdia = pOf(Ymin), pBotAdia = pOf(Ymax);
-  for(let theta=-40; theta<=110; theta+=5){
+  for(let theta=-40; theta<=110; theta+=guideStep){
     const thetaK = theta+273.15;
     ctx.beginPath();
     let started = false;
@@ -535,12 +546,12 @@ function draw(rows){
     ctx.stroke();
   }
 
-  // Moist adiabats — denser grid, every 5°C starting temperature
+  // Moist adiabats — every 5°C starting temperature (10°C on narrow plots)
   ctx.strokeStyle = cMoist;
   ctx.setLineDash([2,3]);
-  ctx.lineWidth = 1.1;
+  ctx.lineWidth = denseBg ? 0.8 : 1.1;
   const pTop = pOf(Ymin);
-  for(let T0=-15; T0<=40; T0+=5){
+  for(let T0=-15; T0<=40; T0+=guideStep){
     const pts = moistAdiabat(T0, 1000, Math.max(500,pTop-20), -10);
     ctx.beginPath();
     pts.forEach(([p,T],i)=>{
@@ -550,6 +561,7 @@ function draw(rows){
     ctx.stroke();
   }
   ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
 
   // ---------- Parcel path / CAPE & CIN shading / LCL marker ----------
   const thermo = computeThermo(rows);
