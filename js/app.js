@@ -2,7 +2,7 @@
 // Loaded last; relies on the globals from core.js, info.js, analytics.js,
 // draw.js, models.js and openmeteo.js (classic scripts sharing one scope).
 
-const APP_VERSION = 'v0.12.1 (2026-10-29)';
+const APP_VERSION = 'v0.12.2 (2026-10-31)';
 const MAX_TOTAL = 3; // models drawn at once (primary + comparisons)
 const SESSION_KEY = 'sc_session_v2';
 const SETTINGS_KEY = 'sc_settings_v1';
@@ -137,7 +137,7 @@ function appDialog(opts){
     if(opts.input) setTimeout(()=>{ inp.focus(); inp.select(); }, 30);
   });
 }
-function appInfo(text, title){ return appDialog({title: title||'StueveCast', text}); }
+function appInfo(text, title){ return appDialog({title: title||'Stüve', text}); }
 
 // ---------- timeline: hour 0 = today 00 UTC, one slider for everything ----------
 function initTimeline(){
@@ -954,14 +954,14 @@ function exportChartPng(){
   octx.setTransform(dpr,0,0,dpr,0,0);
   octx.fillStyle = light ? '#2a323e' : '#cfd8e3';
   octx.font = 'bold 13px IBM Plex Mono, monospace'; octx.textBaseline='top';
-  octx.fillText('StueveCast · '+$('subtitle').textContent, 10, 8);
+  octx.fillText('Stüve · '+$('subtitle').textContent, 10, 8);
   octx.setTransform(1,0,0,1,0,0);
   octx.drawImage(canvas, 0, headerH*dpr);
-  const name = `stuevecast_${((state.loaded&&state.loaded.name)||'profile').replace(/[^a-z0-9]+/gi,'_')}_${fmtUtcDate(currentTimeMs()).replace(/[^0-9]+/g,'-')}.png`;
+  const name = `stueve_${((state.loaded&&state.loaded.name)||'profile').replace(/[^a-z0-9]+/gi,'_')}_${fmtUtcDate(currentTimeMs()).replace(/[^0-9]+/g,'-')}.png`;
   out.toBlob(async blob=>{
     const file = new File([blob], name, {type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
-      try{ await navigator.share({files:[file], title:'StueveCast profile'}); return; }catch(e){ if(e.name==='AbortError') return; }
+      try{ await navigator.share({files:[file], title:'Stüve profile'}); return; }catch(e){ if(e.name==='AbortError') return; }
     }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
@@ -982,9 +982,9 @@ function buildShareUrl(){
 async function shareProfile(){
   if(!state.loaded) return;
   const url = buildShareUrl();
-  const text = `StueveCast — ${state.loaded.name || fmtCoord(state.loaded.lat, state.loaded.lon)}, ${fmtLocal(currentTimeMs(), true)}`;
+  const text = `Stüve — ${state.loaded.name || fmtCoord(state.loaded.lat, state.loaded.lon)}, ${fmtLocal(currentTimeMs(), true)}`;
   if(navigator.share){
-    try{ await navigator.share({title:'StueveCast profile', text, url}); return; }catch(e){ if(e.name==='AbortError') return; }
+    try{ await navigator.share({title:'Stüve profile', text, url}); return; }catch(e){ if(e.name==='AbortError') return; }
   }
   $('shareUrl').value = url;
   $('shareQr').innerHTML = '';
@@ -1151,7 +1151,7 @@ function registerSw(){
   $('copyBtn').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText($('shareUrl').value); $('copyBtn').textContent='Copied'; setTimeout(()=>$('copyBtn').textContent='Copy',1500); }catch(e){ $('shareUrl').select(); } });
   document.querySelectorAll('.panel-export-btn').forEach(b=>b.addEventListener('click', ()=>{
     const c = $(b.dataset.canvas); if(!c) return;
-    c.toBlob(blob=>{ const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download=`stuevecast_${b.dataset.suffix}.png`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),5000); }, 'image/png');
+    c.toBlob(blob=>{ const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download=`stueve_${b.dataset.suffix}.png`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),5000); }, 'image/png');
   }));
   $('thermoStrip').addEventListener('click', e=>{ const t = e.target.closest('[data-info-key]'); if(t) openInfoModal(t.dataset.infoKey); });
   $('commentsInfoBtn').addEventListener('click', ()=>openInfoModal('analyticalComments'));

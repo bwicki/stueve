@@ -1,6 +1,6 @@
 {
-  "name": "StueveCast — Model Sounding Diagram",
-  "short_name": "StueveCast",
+  "name": "Stüve — Model Sounding Diagram",
+  "short_name": "Stüve",
   "description": "Stüve, Emagram and Skew-T diagrams from weather-model profiles for any place and forecast hour, with the analytics of the S2 Radiosonde Sounding Diagram tool.",
   "start_url": "./",
   "scope": "./",

@@ -1,4 +1,4 @@
-# StueveCast — Model Sounding Diagram
+# Stüve — Model Sounding Diagram
 
 Stüve / Emagram / Skew-T diagrams from numerical weather model profiles for any place
 and forecast hour, with the chart and the fourteen analytics fields of the
